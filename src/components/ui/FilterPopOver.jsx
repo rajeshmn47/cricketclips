@@ -18,7 +18,7 @@ export default function FilterPopover({ filter, selected, onChange }) {
 
   return (
     <div className="w-full">
-      <Label>{filter?.label}</Label>
+      <Label className="text-blue-900">{filter?.label}</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div
