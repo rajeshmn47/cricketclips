@@ -37,7 +37,7 @@ export default function Dashboard() {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedClipId, setSelectedClipId] = useState(null);
   const [isEditClipOpen, setIsEditClipOpen] = useState(false);
-  const [selectedClips, setSelectedClips] = useState([]);
+  const [selectedClipIds, setSelectedClipIds] = useState([]);
   const [trimmingClip, setTrimmingClip] = useState(null);
   const editClipForm = useRef(null);
   const [clips, setClips] = useState([]);
@@ -312,7 +312,7 @@ export default function Dashboard() {
   }
 
   const handleDownloadSelected = () => {
-    selectedClips.forEach((clip) => {
+    selectedClipIds.forEach((clip) => {
       const link = document.createElement("a");
       link.href = `${URL}/mockvideos/${clip}`;
       link.download = clip;
@@ -328,7 +328,7 @@ export default function Dashboard() {
     const response = await fetch(`${NEW_URL}/auth/merge`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clips: selectedClips, quality: selectedQuality }),
+      body: JSON.stringify({ clips: selectedClipIds, quality: selectedQuality }),
     });
     console.log(response, 'res');
     const res = await response.json()
@@ -360,21 +360,32 @@ export default function Dashboard() {
     }, 300)
   }
 
-  const toggleSelect = (clipName) => {
-    setSelectedClips(prev =>
-      prev.includes(clipName)
-        ? prev.filter(name => name !== clipName)
-        : [...prev, clipName]
+  const toggleSelecte = (clip) => {
+    console.log(clip, selectedClipIds, 'toggle clip')
+    setSelectedClipIds(prev =>
+      prev.find((p) => p.clip == clip.clip)
+        ? prev.filter(cl => cl.clip !== clip.clip)
+        : [...prev, clip]
     )
   }
+
+  const toggleSelect = (clip) => {
+    console.log(clip, selectedClipIds, 'toggle clip')
+    setSelectedClipIds((prev) =>
+      prev.find((p) => p == clip) // use unique id
+        ? prev.filter((cl) => cl !== clip)
+        : [...prev, clip]
+    );
+    console.log('completed toggle')
+  };
 
   const deleteSelected = async () => {
     if (!confirm("Delete all selected clips?")) return
     setTimeout(() => {
-      setClips(prev => prev.filter(c => !selectedClips.includes(c.clip)))
-      setSelectedClips([])
+      setClips(prev => prev.filter(c => !selectedClipIds.includes(c.clip)))
+      setSelectedClipIds([])
     }, 300)
-    await axios.post(`${URL}/auth/delete-multiple`, { clips: selectedClips })
+    await axios.post(`${URL}/auth/delete-multiple`, { clips: selectedClipIds })
   }
 
   const handleDelete = async (clip) => {
@@ -384,13 +395,13 @@ export default function Dashboard() {
   }
 
   const handleAddToPlayliste = () => {
-    if (!playlistName || selectedClips.length === 0) return;
+    if (!playlistName || selectedClipIds.length === 0) return;
 
     // Example: Save to localStorage or backend
     const existing = JSON.parse(localStorage.getItem(playlistName)) || [];
     localStorage.setItem(
       playlistName,
-      JSON.stringify([...existing, ...selectedClips])
+      JSON.stringify([...existing, ...selectedClipIds])
     );
 
     setPlaylistName("");
@@ -398,7 +409,7 @@ export default function Dashboard() {
     alert("Clips added to playlist!");
   };
 
-  const handleAddToPlaylist = () => {
+  const handleAddToPlaylistee = () => {
     const finalName =
       playlistName === "__new__" ? newPlaylistName.trim() : playlistName;
 
@@ -411,10 +422,46 @@ export default function Dashboard() {
     const existingClips = JSON.parse(localStorage.getItem(finalName) || "[]");
 
     // Merge and deduplicate
-    const updatedClips = Array.from(new Set([...existingClips, ...selectedClips]));
+    const updatedClips = Array.from(new Set([...existingClips, ...selectedClipIds]));
 
     // Save back to localStorage
     localStorage.setItem(finalName, JSON.stringify(updatedClips));
+
+    // Reset
+    setPlaylistName("");
+    setNewPlaylistName("");
+    setShowPlaylistModal(false);
+  };
+
+  const handleAddToPlaylist = () => {
+    const finalName =
+      playlistName === "__new__" ? newPlaylistName.trim() : playlistName;
+
+    if (!finalName) {
+      alert("Please enter a valid playlist name.");
+      return;
+    }
+
+    // Get existing clips (objects)
+    const existingClips = JSON.parse(localStorage.getItem(finalName) || "[]");
+
+    // Only keep the selected clip objects
+    // If you're using selectedClipIds (Set of IDs), map them back to full clip objects
+    const selectedClipsObjects = clips.filter(clip =>
+      selectedClipIds.includes(clip._id)
+    );
+
+    // Merge with existing clips
+    const merged = [...existingClips, ...selectedClipsObjects];
+
+    // Deduplicate by unique ID
+    const uniqueClips = merged.filter(
+      (clip, index, self) =>
+        index === self.findIndex(c => c._id === clip._id)
+    );
+
+    // Save to localStorage
+    localStorage.setItem(finalName, JSON.stringify(uniqueClips));
 
     // Reset
     setPlaylistName("");
@@ -471,7 +518,7 @@ export default function Dashboard() {
           </Button>
           <Button
             variant="ghost"
-            disabled={selectedClips.length === 0}
+            disabled={selectedClipIds.length === 0}
             onClick={() => setShowPlaylistModal(true)}
             className="bg-green-100 text-green-700 hover:bg-green-200 text-xs sm:text-base w-full xs:w-full"
           >
@@ -480,24 +527,30 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-col xs:flex-row flex-wrap gap-2 flex-1 justify-end">
           <label className="text-xs sm:text-sm font-medium text-gray-700">Select All:</label>
-          <div className="flex items-center justify-end gap-2 w-full">
+          <div className="flex gap-2 justify-between">
+            {/* Select All Button */}
             <Button
               variant="outline"
-              onClick={() => {
-                if (selectedClips.length === filteredClips.length) {
-                  setSelectedClips([]); // Deselect all
-                } else {
-                  setSelectedClips(filteredClips.map((clip) => clip.clip)); // Select all visible
-                }
-              }}
-              className="border-blue-300 hover:bg-blue-50 text-xs sm:text-base w-full xs:w-auto"
+              disabled={selectedClipIds.length === filteredClips?.length}
+              onClick={() => setSelectedClipIds(filteredClips.map((clip) => clip.clip))}
+              className="border-blue-300 hover:bg-blue-50 text-xs sm:text-base w-1/2"
             >
-              {selectedClips.length === filteredClips.length ? 'Deselect All' : 'Select All'}
+              Select All
+            </Button>
+
+            {/* Deselect All Button */}
+            <Button
+              variant="outline"
+              disabled={selectedClipIds.length === 0}
+              onClick={() => setSelectedClipIds([])}
+              className="border-red-300 hover:bg-red-50 text-xs sm:text-base w-1/2"
+            >
+              Deselect All
             </Button>
           </div>
           <Button
             variant="secondary"
-            disabled={selectedClips.length === 0}
+            disabled={selectedClipIds.length === 0}
             onClick={handleDownloadSelected}
             className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base w-full xs:w-auto"
           >
@@ -505,7 +558,7 @@ export default function Dashboard() {
           </Button>
           <Button
             variant="default"
-            disabled={selectedClips.length === 0}
+            disabled={selectedClipIds.length === 0}
             onClick={handleMergeAndDownload}
             className="bg-blue-500 text-white hover:bg-blue-600 text-xs sm:text-base w-full xs:w-auto"
           >
@@ -514,14 +567,14 @@ export default function Dashboard() {
         </div>
       </div>
       <Filters values={filterValues} onChange={handleFilterChange} clips={clips} />
-      {isAdmin && selectedClips.length > 0 && (
+      {isAdmin && selectedClipIds.length > 0 && (
         <div className="flex justify-end">
           <Button
             variant="destructive"
             className="text-white bg-red-500 border border-red-300 hover:bg-red-600 text-xs sm:text-base"
             onClick={deleteSelected}
           >
-            Delete Selected ({selectedClips.length})
+            Delete Selected ({selectedClipIds.length})
           </Button>
         </div>
       )}
@@ -567,8 +620,8 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-gray-500">{clip?.commentary}</p>
               {/*<p className="font-semibold">{clip.duration}</p>*/}
               <Checkbox
-                checked={selectedClips.includes(clip.clip)}
-                onCheckedChange={() => toggleSelect(clip.clip)}
+                checked={selectedClipIds.includes(clip._id)}
+                onCheckedChange={() => toggleSelect(clip._id)}
                 className="absolute top-2 right-2 border border-blue-400 bg-white/80"
               />
               {isAdmin && (

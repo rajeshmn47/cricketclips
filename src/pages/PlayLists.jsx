@@ -169,16 +169,25 @@ const PlaylistsPage = () => {
                     {expandedPlaylist ? (
                         <>
                             <h3 className="text-lg font-bold text-blue-700 mb-3">
-                                🎥 Clips in "{expandedPlaylist}"
+                                🎥 Clips in "{expandedPlaylist}"g
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                {selectedClips.map((clipUrl, i) => (
-                                    <video
+                                {selectedClips.map((clip, i) => (
+                                    <div
                                         key={i}
-                                        src={`${NEW_URL}/mockvideos/${clipUrl}`}
-                                        controls
-                                        className="rounded-lg shadow-md"
-                                    />
+                                        className="relative rounded-lg overflow-hidden shadow-md group hover:shadow-lg transition"
+                                    >
+                                        <video
+                                            src={`${NEW_URL}/mockvideos/${clip?.clip}`}
+                                            controls
+                                            className="w-full h-32 sm:h-40 md:h-48 object-cover rounded-lg"
+                                        />
+                                        <div className="text-xs sm:text-sm p-2 group-hover:opacity-100 transition">
+                                            <p className="truncate font-semibold">{clip.batsman}a</p>
+                                            <p className="truncate">vs {clip.bowler}</p>
+                                            <p className="truncate">{clip.event}</p>
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </>
@@ -208,7 +217,8 @@ const PlaylistsPage = () => {
                         <div className="space-y-2 max-h-48 overflow-y-auto">
                             {editableClips.map((clip, index) => (
                                 <div key={index} className="flex justify-between items-center px-3 py-2 bg-gray-50 rounded">
-                                    <span className="text-sm text-gray-700 truncate">{clip}</span>
+                                    <p className="font-semibold text-base sm:text-sm text-blue-900">{clip.batsman}</p>
+                                    <p className="text-xs sm:text-sm font-medium text-blue-600">{clip.event}</p>
                                     <button
                                         onClick={() => {
                                             setEditableClips(editableClips.filter((_, i) => i !== index));
