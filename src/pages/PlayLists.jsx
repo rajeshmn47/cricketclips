@@ -169,7 +169,7 @@ const PlaylistsPage = () => {
                     {expandedPlaylist ? (
                         <>
                             <h3 className="text-lg font-bold text-blue-700 mb-3">
-                                🎥 Clips in "{expandedPlaylist}"g
+                                🎥 Clips in "{expandedPlaylist}"
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 {selectedClips.map((clip, i) => (
@@ -183,9 +183,15 @@ const PlaylistsPage = () => {
                                             className="w-full h-32 sm:h-40 md:h-48 object-cover rounded-lg"
                                         />
                                         <div className="text-xs sm:text-sm p-2 group-hover:opacity-100 transition">
-                                            <p className="truncate font-semibold">{clip.batsman}a</p>
-                                            <p className="truncate">vs {clip.bowler}</p>
-                                            <p className="truncate">{clip.event}</p>
+                                            <p className="truncate font-semibold" title={clip.batsman}>
+                                                🏏 {clip.batsman}
+                                            </p>
+                                            <p className="truncate" title={`vs ${clip.bowler}`}>
+                                                🎯 vs {clip.bowler}
+                                            </p>
+                                            <p className="truncate" title={clip.event}>
+                                                📌 {clip.event}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
