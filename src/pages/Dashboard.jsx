@@ -325,10 +325,13 @@ export default function Dashboard() {
 
   const handleMergeAndDownload = async () => {
     setLoading(true)
+    const selectedClipsObjects = clips.filter(clip =>
+      selectedClipIds.includes(clip._id)
+    ).map((c) => c.clip)
     const response = await fetch(`${NEW_URL}/auth/merge`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clips: selectedClipIds, quality: selectedQuality }),
+      body: JSON.stringify({ clips: selectedClipsObjects, quality: selectedQuality }),
     });
     console.log(response, 'res');
     const res = await response.json()
