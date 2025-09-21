@@ -147,7 +147,7 @@ export default function Dashboard() {
           const comm = clip.commentary?.toLowerCase() || "";
           const shotType = clip.shotType?.toLowerCase() || "";
           // Synonyms for lofted
-          const loftedSynonyms = cricketSynonyms.shotType?.lofted || [];
+          const loftedSynonyms = cricketSynonyms?.lofted?.lofted || [];
           // Match in commentary or shotType
           return (
             loftedSynonyms.some(syn => comm.includes(syn) || shotType.includes(syn))
@@ -169,7 +169,7 @@ export default function Dashboard() {
             "keeps it low"
           ];
           // Should NOT match any lofted synonyms
-          const loftedSynonyms = cricketSynonyms.shotType?.lofted || [];
+          const loftedSynonyms = cricketSynonyms.lofted || [];
           // Must match a grounded synonym and NOT a lofted synonym
           return (
             groundedSynonyms.some(syn => comm.includes(syn) || shotType.includes(syn)) ||
@@ -621,6 +621,26 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-gray-600">vs {clip.bowler}</p>
               <p className="text-xs sm:text-sm font-medium text-blue-600">{clip.event}</p>
               <p className="text-xs sm:text-sm text-gray-500">{clip?.commentary}</p>
+              <div className='flex flex-wrap gap-2'>
+                {clip?.labels?.shotType && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.shotType?.split('_').join(' ')}
+                </Button>}
+                {clip?.labels?.ballType && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.ballType?.split('_').join(' ')}</Button>}
+                {clip?.labels?.direction && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.direction?.split('_').join(' ')}
+                </Button>}
+                {clip?.labels?.connection && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.connection?.split('_').join(' ')}
+                </Button>}</div>
               {/*<p className="font-semibold">{clip.duration}</p>*/}
               <Checkbox
                 checked={selectedClipIds.includes(clip._id)}

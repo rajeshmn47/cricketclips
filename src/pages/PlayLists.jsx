@@ -57,14 +57,14 @@ const PlaylistsPage = () => {
         alert("Download started (simulated).");
     };
 
-    const handleMergeAndDownload = async () => {
+    const handleMergeAndDownload = async (clips) => {
         setLoading(true)
         const response = await fetch(`${NEW_URL}/auth/merge`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ clips: selectedClips, quality: selectedQuality }),
+            body: JSON.stringify({ clips: clips?.map((m) => m.clip), quality: selectedQuality }),
         });
-        console.log(response, 'res');
+        console.log(response, selectedClips, 'res');
         const res = await response.json()
         console.log(res, 'res');
         const downloadUrl = `${videoSrc}/${res.file}`;
@@ -138,7 +138,7 @@ const PlaylistsPage = () => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            handleMergeAndDownload()
+                                            handleMergeAndDownload(clips)
                                         }}
                                         className="text-sm px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition"
                                         title="Download all clips"

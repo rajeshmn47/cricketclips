@@ -70,7 +70,6 @@ function Filters({ values, onChange, clips }) {
     { id: "reverse_sweep", name: "Reverse Sweep" },
     { id: "paddle_sweep", name: "Paddle Sweep" },
     { id: "switch_hit", name: "Switch Hit" },
-    { id: "lofted", name: "Lofted" },
     { id: "helicopter_shot", name: "Helicopter Shot" },
     { id: "glance", name: "Glance" },
     { id: "flick", name: "Flick" },
@@ -145,8 +144,6 @@ function Filters({ values, onChange, clips }) {
     { id: "short_leg", name: "Short Leg" },
     { id: "silly_point", name: "Silly Point" },
     { id: "mid_wicket", name: "Mid Wicket" },
-    { id: "mid_off", name: "Mid Off" },
-    { id: "mid_on", name: "Mid On" },
     { id: "backward_point", name: "Backward Point" },
     { id: "backward_square_leg", name: "Backward Square Leg" },
     { id: "leg_slip", name: "Leg Slip" },
@@ -187,10 +184,7 @@ function Filters({ values, onChange, clips }) {
 
   const connectionGroups = {
     "Clean Contact": [
-      { id: "well_timed", name: "Well Timed" },
-      { id: "middle", name: "Middle" },
-      { id: "perfect_timing", name: "Perfect Timing" },
-      { id: "sweet_spot", name: "Sweet Spot" }
+      { id: "well_timed", name: "Well Timed" }
     ],
     "Mistimed": [
       { id: "miscue", name: "Miscue" },
