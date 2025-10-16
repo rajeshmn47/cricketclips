@@ -69,7 +69,7 @@ function geturl() {
         // return "https://dreamelevenclonebackend-g4iw.onrender.com";
         // return "https://fantasycricket4u.com";
         // return "https://backend.dreambet11.io";
-        return "https://fango11.duckdns.org";
+        return "https://gclteam.duckdns.org";
         // return "https://mangogames.fun/api";
     }
     // return "https://dreamelevenclonebackend-7l34.onrender.com";
