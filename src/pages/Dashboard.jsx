@@ -640,7 +640,13 @@ export default function Dashboard() {
                   size="sm"
                   className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
                   {clip?.labels?.connection?.split('_').join(' ')}
-                </Button>}</div>
+                </Button>}
+                {clip?.labels?.lofted && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.lofted && 'lofted'}
+                </Button>}
+              </div>
               {/*<p className="font-semibold">{clip.duration}</p>*/}
               <Checkbox
                 checked={selectedClipIds.includes(clip._id)}
