@@ -53,6 +53,7 @@ export default function Dashboard() {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [playlists, setPlaylists] = useState({});
+  const [totalPages, setTotalPages] = useState(0)
 
   useEffect(() => {
     const stored = { ...localStorage };
@@ -79,7 +80,7 @@ export default function Dashboard() {
         const clipValue = clip[key];
         console.log(clipValue, key, value, 'clip value')
         // Semantic matching for shotType, direction, ballType
-        if (["shotType", "direction", "ballType", "isCleanBowled", "connection"].includes(key)) {
+        if (["shotType", "direction", "ballType", "isCleanBowled", "connection", "lengthType"].includes(key)) {
           if (key == "isCleanBowled") {
             value = "isCleanBowled"
           }
@@ -258,29 +259,34 @@ export default function Dashboard() {
     });
 
   // Calculate paginated clips
-  const paginatedClips = filteredClips.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredClips.length / itemsPerPage);
+  const paginatedClips = filteredClips;
 
   // Only show admin controls if user is logged in and user.role is 'admin'
   const isAdmin = user && user.role === "user";
   console.log(user, 'user')
+
   useEffect(() => {
     dispatch(loadUser());
     const fetchClips = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${URL}/auth/allclips`);
+        let event = filterValues?.isWicket ? "WICKET" : filterValues?.isFour ? "FOUR" : filterValues?.isSix ? "SIX" : null;
+        const params = {
+          ...filterValues,
+          event: event,
+          page: currentPage,
+          limit: itemsPerPage,
+        };
+        const res = await API.get(`${URL}/clips/all_clips`, { params });
         //const clipsWithDuration = await Promise.all(
         //  res.data.map((clip) => getClipWithDuration(clip))
         //);
-        const enhancedClips = res.data.map((clip) => {
+        const enhancedClips = res.data.clips.map((clip) => {
           const inferred = inferDismissals(clip?.event, clip.commentary || "")
           return { ...clip, ...inferred }
         })
         setClips(enhancedClips);
+        setTotalPages(res.data.totalPages)
         //setClips(clipsWithDuration);
       } catch (err) {
         console.error("Error fetching clips:", err);
@@ -290,7 +296,7 @@ export default function Dashboard() {
     };
 
     fetchClips();
-  }, [dispatch]);
+  }, [dispatch, currentPage, filterValues, itemsPerPage]);
 
   const getClipWithDuration = (clip) => {
     return new Promise((resolve) => {
@@ -583,7 +589,7 @@ export default function Dashboard() {
       )}
       <div className="flex flex-wrap items-center gap-4 justify-between mb-2">
         <p className="text-sm text-muted-foreground">
-          {filteredClips.length} item{filteredClips.length !== 1 && "s"} selected
+          {itemsPerPage * totalPages} item{filteredClips.length !== 1 && "s"} selected
         </p>
         <div className="flex items-center gap-2">
           <label htmlFor="itemsPerPage" className="text-sm text-gray-700 font-medium">Items per page:</label>
@@ -645,6 +651,16 @@ export default function Dashboard() {
                   size="sm"
                   className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
                   {clip?.labels?.lofted && 'lofted'}
+                </Button>}
+                {clip?.labels?.slowball && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.slowball && 'slow ball'}
+                </Button>}
+                {clip?.labels?.lengthType && <Button variant="secondary"
+                  size="sm"
+                  className="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs sm:text-base">
+                  {clip?.labels?.lengthType && clip?.labels?.lengthType?.split('_').join(' ')}
                 </Button>}
               </div>
               {/*<p className="font-semibold">{clip.duration}</p>*/}

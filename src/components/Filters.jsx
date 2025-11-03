@@ -83,11 +83,6 @@ function Filters({ values, onChange, clips }) {
   ]
 
   const ballTypes = [
-    { id: "yorker", name: "Yorker" },
-    { id: "full_toss", name: "Full Toss" },
-    { id: "good_length", name: "Good Length" },
-    { id: "short_of_length", name: "Short of a Length" },
-    { id: "bouncer", name: "Bouncer" },
     { id: "slow_ball", name: "Slow Ball" },
     { id: "off_cutter", name: "Off Cutter" },
     { id: "leg_cutter", name: "Leg Cutter" },
@@ -95,12 +90,7 @@ function Filters({ values, onChange, clips }) {
     { id: "wide", name: "Wide" },
     { id: "no_ball", name: "No Ball" },
     { id: "beamer", name: "Beamer" },
-    { id: "length_ball", name: "Length Ball" },
-    { id: "full_length", name: "Full Length" },
-    { id: "half_volley", name: "Half Volley" },
     { id: "short_ball", name: "Short Ball" },
-    { id: "back_of_length", name: "Back of a Length" },
-    { id: "overpitched", name: "Overpitched" },
     { id: "inswinger", name: "Inswinger" },
     { id: "outswinger", name: "Outswinger" },
     { id: "reverse_swing", name: "Reverse Swing" },
@@ -118,6 +108,26 @@ function Filters({ values, onChange, clips }) {
     { id: "split_finger", name: "Split Finger" },
     { id: "slower_ball_bouncer", name: "Slower Ball Bouncer" },
     { id: "reverse_swing_yorker", name: "Reverse Swing Yorker" },
+    { id: "other", name: "Other" }
+  ];
+
+  const lengthTypes = [
+    { id: "yorker", name: "Yorker" },
+    { id: "full_toss", name: "Full Toss" },
+    { id: "good_length", name: "Good Length" },
+    { id: "short_of_length", name: "Short of a Length" },
+    { id: "bouncer", name: "Bouncer" },
+    { id: "slow_ball", name: "Slow Ball" },
+    { id: "slower_bouncer", name: "Slower Bouncer" },
+    { id: "wide", name: "Wide" },
+    { id: "no_ball", name: "No Ball" },
+    { id: "beamer", name: "Beamer" },
+    { id: "length_ball", name: "Length Ball" },
+    { id: "full_length", name: "Full Length" },
+    { id: "half_volley", name: "Half Volley" },
+    { id: "short_ball", name: "Short Ball" },
+    { id: "back_of_length", name: "Back of a Length" },
+    { id: "overpitched", name: "Overpitched" },
     { id: "other", name: "Other" }
   ];
 
@@ -318,6 +328,7 @@ function Filters({ values, onChange, clips }) {
     { type: "select", label: "Shot Type", key: "shotType", options: shotTypes },
     { type: "select", label: "Ball Type", key: "ballType", options: ballTypes },
     { type: "select", label: "Direction", key: "direction", options: directionOptions },
+    { type: "select", label: "Length Type", key: "lengthType", options: lengthTypes },
     { key: "connection", label: "Connection Type", type: "select", groups: connectionGroups },
     { type: "searchable", label: "Caught By", key: "caughtBy", options: uniqueFielders },
     { type: "searchable", label: "Run Out By", key: "runOutBy", options: uniqueFielders },

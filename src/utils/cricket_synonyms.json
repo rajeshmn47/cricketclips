@@ -413,6 +413,74 @@
       "other"
     ]
   },
+  "lengthType": {
+    "yorker": [
+      "yorker",
+      "blockhole",
+      "block hole",
+      "toe crusher",
+      "in the blockhole",
+      "very full"
+    ],
+    "full_toss": [
+      "full toss",
+      "full toss ball",
+      "full-toss"
+    ],
+    "good_length": [
+      "good length",
+      "perfect length",
+      "good length ball",
+      "length delivery"
+    ],
+    "short_of_length": [
+      "short of a length",
+      "short length",
+      "Shortish ball",
+      "dug in short"
+    ],
+    "bouncer": [
+      "bouncer",
+      "banged in short"
+    ],
+    "full_length": [
+      "full length",
+      "full length ball",
+      "fuller length delivery",
+      "full ball",
+      "fuller length"
+    ],
+    "half_volley": [
+      "half volley",
+      "half-volley",
+      "overpitched",
+      "over-pitched",
+      "pitched up",
+      "pitched-up"
+    ],
+    "short_ball": [
+      "short ball",
+      "short pitched",
+      "Shortish ball",
+      "dug in short"
+    ],
+    "back_of_length": [
+      "back of a length",
+      "back length"
+    ],
+    "overpitched": [
+      "overpitched",
+      "over pitched"
+    ],
+    "beamer": [
+      "beamer",
+      "waist high full toss"
+    ],
+    "length_ball": [
+      "length ball",
+      "good length"
+    ]
+  },
   "keeperCatch": {
     "keeper_catch": [
       "keeper catch",
