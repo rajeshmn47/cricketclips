@@ -53,7 +53,8 @@ export default function Dashboard() {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [playlists, setPlaylists] = useState({});
-  const [totalPages, setTotalPages] = useState(0)
+  const [totalPages, setTotalPages] = useState(0);
+  const [allPlayers, setAllPlayers] = useState([]);
 
   useEffect(() => {
     const stored = { ...localStorage };
@@ -72,6 +73,14 @@ export default function Dashboard() {
 
     setPlaylists(loadedPlaylists);
   }, []);
+
+  useEffect(() => {
+    async function getPlayers() {
+      const { data } = await API.get(`${URL}/clips/all_players`)
+      setAllPlayers([...data])
+    }
+    getPlayers()
+  }, [])
 
   const filteredClips = clips
     .filter((clip) => {
@@ -575,7 +584,7 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
-      <Filters values={filterValues} onChange={handleFilterChange} clips={clips} />
+      <Filters values={filterValues} onChange={handleFilterChange} clips={clips} players={allPlayers} />
       {isAdmin && selectedClipIds.length > 0 && (
         <div className="flex justify-end">
           <Button
@@ -701,29 +710,61 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
-      {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <Button
-            variant="outline"
-            className="px-2 sm:px-3 py-1 text-xs sm:text-base"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
-          >
-            Previous
-          </Button>
-          <span className="text-blue-900 font-semibold text-xs sm:text-base">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            className="px-2 sm:px-3 py-1 text-xs sm:text-base"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
-          >
-            Next
-          </Button>
-        </div>
+        (() => {
+          // Compute a compact list of pages to show: first, last, and a window around currentPage
+          const maxDisplay = 7;
+          const visible = [];
+          if (totalPages <= maxDisplay) {
+            for (let i = 1; i <= totalPages; i++) visible.push(i);
+          } else {
+            visible.push(1);
+            if (currentPage > 3) visible.push('left-ellipsis');
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+            for (let i = start; i <= end; i++) visible.push(i);
+            if (currentPage < totalPages - 2) visible.push('right-ellipsis');
+            visible.push(totalPages);
+          }
+
+          return (
+            <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+              <Button
+                variant="outline"
+                className="px-2 sm:px-3 py-1 text-xs sm:text-base"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              >
+                Previous
+              </Button>
+
+              {visible.map((p, idx) =>
+                p === 'left-ellipsis' || p === 'right-ellipsis' ? (
+                  <span key={`ell-${idx}`} className="px-2 text-sm">...</span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={currentPage === p ? "default" : "outline"}
+                    className={`px-2 sm:px-3 py-1 text-xs sm:text-base ${currentPage === p ? "bg-blue-500 text-white" : "hover:bg-blue-50"
+                      }`}
+                    onClick={() => setCurrentPage(p)}
+                  >
+                    {p}
+                  </Button>
+                )
+              )}
+
+              <Button
+                variant="outline"
+                className="px-2 sm:px-3 py-1 text-xs sm:text-base"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          );
+        })()
       )}
       {trimmingClip && (
         <Dialog open={!!trimmingClip} onOpenChange={() => setTrimmingClip(null)}>

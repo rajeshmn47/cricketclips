@@ -21,7 +21,7 @@ import { useState } from "react"
 import FilterPopover from "./ui/FilterPopOver"
 import { Button } from "@/components/ui/button"
 
-function Filters({ values, onChange, clips }) {
+function Filters({ values, onChange, clips, players }) {
   const [open, setOpen] = React.useState(false);
   const [openMap, setOpenMap] = useState({});
   const [filterMode, setFilterMode] = useState("basic"); // 'basic' or 'advanced'
@@ -32,21 +32,20 @@ function Filters({ values, onChange, clips }) {
   };
 
 
-  const uniqueBatsmen = Array.from(
-    new Set(clips.map((clip) => clip.batsman))
-  ).map((name) => ({
-    id: name?.toLowerCase(),
-    name,
+  const uniqueBatsmen = players?.map((player) => ({
+    id: player?.name?.toLowerCase(),
+    name: player.name,
   }));
 
-  const uniqueBowler = Array.from(
-    new Set(clips.map((clip) => clip.bowler))
-  ).map((name) => ({
-    id: name?.toLowerCase(),
-    name,
+  const uniqueBowler = players?.map((player) => ({
+    id: player?.name?.toLowerCase(),
+    name: player.name,
   }));
 
-  let alluniqueplayers = uniqueBatsmen?.concat(uniqueBowler)
+  let alluniqueplayers = players?.map((player) => ({
+    id: player?.name?.toLowerCase(),
+    name: player.name,
+  }));
 
   // Extract unique fielders for the "Caught By" filter
   const uniqueFielders = Array.from(
