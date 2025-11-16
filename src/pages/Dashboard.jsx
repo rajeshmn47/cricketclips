@@ -268,7 +268,7 @@ export default function Dashboard() {
     });
 
   // Calculate paginated clips
-  const paginatedClips = filteredClips;
+  const paginatedClips = clips;
 
   // Only show admin controls if user is logged in and user.role is 'admin'
   const isAdmin = user && user.role === "user";
