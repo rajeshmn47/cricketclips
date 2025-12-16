@@ -17,14 +17,34 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label"
 import { Switch } from "./ui/switch"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import FilterPopover from "./ui/FilterPopOver"
 import { Button } from "@/components/ui/button"
+
+import { API } from "../actions/userAction";
+import { URL } from "../constants/userConstants";
 
 function Filters({ values, onChange, clips, players }) {
   const [open, setOpen] = React.useState(false);
   const [openMap, setOpenMap] = useState({});
   const [filterMode, setFilterMode] = useState("basic"); // 'basic' or 'advanced'
+  const [seriesOptions, setSeriesOptions] = useState([]);
+  const [seriesLoading, setSeriesLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSeries = async () => {
+      setSeriesLoading(true);
+      try {
+        const res = await API.get(`${URL}/api/match/series/all`);
+        setSeriesOptions(res.data || []);
+      } catch (err) {
+        setSeriesOptions([]);
+      } finally {
+        setSeriesLoading(false);
+      }
+    };
+    fetchSeries();
+  }, []);
 
   const togglePopover = (key, value) => {
     console.log(key, value, 'toggling')
@@ -268,7 +288,7 @@ function Filters({ values, onChange, clips, players }) {
     { type: "searchable", label: "Bowler", key: "bowler", options: uniqueBowler },
     { type: "searchable", label: "Team", key: "batting_team", options: teamOptions },
     {
-      type: "select", label: "League", key: "series", options: [
+      type: "select", label: "League", key: "league", options: [
         { id: "ipl", name: "IPL" },
         { id: "bbl", name: "BBL" },
         { id: "psl", name: "PSL" },
@@ -284,6 +304,15 @@ function Filters({ values, onChange, clips, players }) {
     { type: "searchable", label: "Bowling Team", key: "bowling_team", options: teamOptions },
     { type: "select", label: "Bowler Type", key: "bowlerType", options: [{ id: "fast", name: "fast" }, { id: "spin", name: "Spin" }] },
     { type: "select", label: "Batting Hand", key: "battingHand", options: [{ id: "left", name: "Left" }, { id: "right", name: "Right" }] },
+    {
+      type: "searchable",
+      label: "Series",
+      key: "series",
+      options: seriesOptions.map(series => ({
+        id: series.seriesId,
+        name: series.name || series.label
+      }))
+    },
     { type: "select", label: "Bowling Hand", key: "bowlingHand", options: [{ id: "left", name: "Left" }, { id: "right", name: "Right" }] },
     { type: "select", label: "Match Format", key: "matchFormat", options: [{ id: "odi", name: "ODI" }, { id: "t20", name: "T20" }, { id: "test", name: "Test" }] },
     { type: "select", label: "Match Venue", key: "venue", options: [{ id: "wankhede", name: "Wankhede" }, { id: "chinnaswamy", name: "Chinnaswamy" }] },
