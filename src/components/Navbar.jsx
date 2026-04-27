@@ -27,6 +27,9 @@ export default function Navbar() {
             <a href="/contact" className="hover:text-blue-600">
               Contact
             </a>
+            <a href="/support" className="hover:text-blue-600">
+              Support
+            </a>
             <a
               href="https://www.linkedin.com/in/your-linkedin-username"
               target="_blank"
@@ -61,6 +64,9 @@ export default function Navbar() {
             </a>
             <a href="/contact" className="block hover:text-blue-600">
               Contact
+            </a>
+            <a href="/support" className="block hover:text-blue-600">
+              Support
             </a>
           </div>
         </div>

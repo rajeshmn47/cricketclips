@@ -1,65 +1,99 @@
-import { useState } from "react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover"; // if using shadcn/ui
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandItem,
-  CommandEmpty,
-} from "@/components/ui/command";
-import { Label } from "./label";
+import { useState, useEffect, useRef } from "react";
+import { Label } from "@/components/ui/label";
 
-export default function FilterPopover({ filter, selected, onChange }) {
-  const [open, setOpen] = useState(false);
+export default function SearchableFilter({ filter, selected, onChange }) {
+  const [query, setQuery] = useState(selected?.name || "");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (selected && selected.name !== query) {
+      setQuery(selected.name);
+    }
+  }, [selected]);
+
+  // close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = filter.options.filter((opt) =>
+    opt.name.toLowerCase().includes(query.toLowerCase().trim())
+  );
+
+  console.log("filteredOptions", filteredOptions);
 
   return (
-    <div className="w-full">
-      <Label className="text-blue-900">{filter?.label}</Label>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <div
-            className="border w-full rounded h-[35px] px-3 py-1 my-1 text-sm bg-white cursor-pointer flex justify-between items-center w-[200px]"
-            role="button"
+    <div className="relative w-full" ref={containerRef}>
+      <Label className="block text-sm font-medium text-blue-900 mb-1">
+        {filter.label}
+      </Label>
+
+      {/* Input with clear button */}
+      <div className="relative">
+        <input
+          type="text"
+          className="border border-blue-200 bg-white rounded px-2 py-2 w-full text-sm pr-8"
+          placeholder={`Search ${filter.label}...`}
+          value={query}
+          onFocus={() => setShowSuggestions(true)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setQuery(v);
+            setShowSuggestions(true);
+
+            // if user starts typing again, clear selected filter
+            if (selected) onChange(filter.key, null);
+          }}
+        />
+
+        {/* Clear button */}
+        {query && (
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-sm"
+            onClick={() => {
+              setQuery("");
+              setShowSuggestions(true);
+              onChange(filter.key, null);
+            }}
           >
-            {selected?.name ? selected.name : `Select ${filter.label}`}
-            {selected?.name && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChange(filter.key, null);
-                  setOpen(false); // close popover on clear
-                }}
-                className="ml-2 text-gray-500 text-xl hover:text-black cursor-pointer border-none outline-orange-300"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="p-0 w-[200px] bg-white">
-          <Command>
-            <CommandInput placeholder={`Search ${filter.label}...`} />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              {filter.options.map((opt) => (
-                <CommandItem
-                  key={opt.id}
-                  onSelect={() => {
-                    onChange(filter.key, opt.id);
-                    setOpen(false); // close on select
-                  }}
-                >
-                  {opt.name}
-                </CommandItem>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Suggestions dropdown */}
+      {showSuggestions && (
+        <div key={query} className="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-56 overflow-auto">
+          {filteredOptions.length === 0 && (
+            <div className="px-2 py-2 text-sm text-gray-400">
+              No results found
+            </div>
+          )}
+
+          {filteredOptions.map((opt) => (
+            <div
+              key={opt.id}
+              className="px-2 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+              onMouseDown={() => {
+                onChange(filter.key, opt.id);
+                setQuery(opt.name);
+                setShowSuggestions(false);
+              }}
+            >
+              {opt.name}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

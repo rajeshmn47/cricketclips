@@ -102,10 +102,8 @@ function Filters({ values, onChange, clips, players }) {
   ]
 
   const ballTypes = [
-    { id: "slow_ball", name: "Slow Ball" },
     { id: "off_cutter", name: "Off Cutter" },
     { id: "leg_cutter", name: "Leg Cutter" },
-    { id: "slower_bouncer", name: "Slower Bouncer" },
     { id: "wide", name: "Wide" },
     { id: "no_ball", name: "No Ball" },
     { id: "beamer", name: "Beamer" },
@@ -125,7 +123,6 @@ function Filters({ values, onChange, clips, players }) {
     { id: "off_break", name: "Off Break" },
     { id: "knuckle_ball", name: "Knuckle Ball" },
     { id: "split_finger", name: "Split Finger" },
-    { id: "slower_ball_bouncer", name: "Slower Ball Bouncer" },
     { id: "reverse_swing_yorker", name: "Reverse Swing Yorker" },
     { id: "other", name: "Other" }
   ];
@@ -136,8 +133,6 @@ function Filters({ values, onChange, clips, players }) {
     { id: "good_length", name: "Good Length" },
     { id: "short_of_length", name: "Short of a Length" },
     { id: "bouncer", name: "Bouncer" },
-    { id: "slow_ball", name: "Slow Ball" },
-    { id: "slower_bouncer", name: "Slower Bouncer" },
     { id: "wide", name: "Wide" },
     { id: "no_ball", name: "No Ball" },
     { id: "beamer", name: "Beamer" },
@@ -148,6 +143,12 @@ function Filters({ values, onChange, clips, players }) {
     { id: "back_of_length", name: "Back of a Length" },
     { id: "overpitched", name: "Overpitched" },
     { id: "other", name: "Other" }
+  ];
+
+  const variationTypes = [
+    { id: "normal", name: "Normal" },
+    { id: "slow", name: "Slower Ball" },
+    { id: "faster", name: "Faster Ball" }
   ];
 
   const directionOptions = [
@@ -280,7 +281,15 @@ function Filters({ values, onChange, clips, players }) {
     { id: "oma", name: "Oman" },
     { id: "usa", name: "USA" },
     { id: "nep", name: "Nepal" },
-    { id: "sco", name: "Scotland" }
+    { id: "sco", name: "Scotland" },
+
+    // ILT20 teams
+    { id: "dv", name: "Desert Vipers" },
+    { id: "dcp", name: "Dubai Capitals" },
+    { id: "gg", name: "Gulf Giants" },
+    { id: "mie", name: "MI Emirates" },
+    { id: "sw", name: "Sharjah Warriors" },
+    { id: "adkr", name: "Abu Dhabi Knight Riders" }
   ]
 
   const filterConfig = [
@@ -314,10 +323,12 @@ function Filters({ values, onChange, clips, players }) {
       }))
     },
     { type: "select", label: "Bowling Hand", key: "bowlingHand", options: [{ id: "left", name: "Left" }, { id: "right", name: "Right" }] },
-    { type: "select", label: "Match Format", key: "matchFormat", options: [{ id: "odi", name: "ODI" }, { id: "t20", name: "T20" }, { id: "test", name: "Test" }] },
+    { type: "select", label: "Match Format", key: "format", options: [{ id: "odi", name: "ODI" }, { id: "t20", name: "T20" }, { id: "test", name: "Test" }] },
+    { type: "select", label: "Match Type", key: "type", options: [{ id: "i", name: "international" }, { id: "d", name: "Domestic" }, { id: "l", name: "League" }] },
     { type: "select", label: "Match Venue", key: "venue", options: [{ id: "wankhede", name: "Wankhede" }, { id: "chinnaswamy", name: "Chinnaswamy" }] },
     {
       type: "select", label: "Season", key: "season", options: [
+        { id: "2026", name: "2026" },
         { id: "2025", name: "2025" },
         { id: "2024", name: "2024" },
         { id: "2023", name: "2023" },
@@ -332,19 +343,63 @@ function Filters({ values, onChange, clips, players }) {
         { id: "other", name: "Other" }
       ]
     },
+    {
+      type: "select",
+      label: "Event",
+      key: "event",
+      options: [
+        // 🔥 High-Impact Events
+        { id: "four", name: "Four" },
+        { id: "six", name: "Six" },
+        { id: "wicket", name: "Wicket" },
+        { id: "dropped", name: "Dropped Catch" },
+
+        // Regular scoring
+        { id: "dot", name: "Dot Ball" },
+        { id: "single", name: "Single (1 Run)" },
+        { id: "double", name: "Two Runs" },
+        { id: "triple", name: "Three Runs" },
+
+        // Extras
+        { id: "wide", name: "Wide" },
+        { id: "noball", name: "No Ball" },
+        { id: "bye", name: "Bye" },
+        { id: "legbye", name: "Leg Bye" },
+        { id: "penalty", name: "Penalty Runs" },
+
+        // Fallback
+        { id: "other", name: "Other" }
+      ]
+    },
     { type: "select", label: "Over Range", key: "overRange", options: [{ id: "1-6", name: "1-6" }, { id: "7-15", name: "7-15" }, { id: "16-20", name: "16-20" }] },
-    { type: "boolean", label: "Is Boundary", key: "isBoundary" },
-    { type: "boolean", label: "Is Six", key: "isSix" },
-    { type: "boolean", label: "Is Four", key: "isFour" },
-    { type: "boolean", label: "Is Wicket", key: "isWicket" },
-    { type: "boolean", label: "Is Catch", key: "isCatch" },
-    { type: "boolean", label: "Is Runout", key: "isRunout" },
-    { type: "boolean", label: "Is LBW", key: "isLBW" },
-    { type: "boolean", label: "Is Clean Bowled", key: "isCleanBowled" },
-    { type: "boolean", label: "Is Stumping", key: "isStumping" },
-    { type: "boolean", label: "Keeper Catch", key: "isKeeperCatch" },
-    { type: "boolean", label: "Lofted", key: "isLofted" }, // <-- Add this line
-    { type: "boolean", label: "Along the Ground", key: "isGrounded" },
+    {
+      type: "select",
+      label: "Wicket Type",
+      key: "wicketType",
+      options: [
+        { id: "bowled", name: "Bowled" },
+        { id: "caught", name: "Caught" },
+        { id: "keeperCatch", name: "Keeper Catch" },
+        { id: "runout", name: "Run Out" },
+        { id: "lbw", name: "LBW" },
+        { id: "stumped", name: "Stumped" },
+        { id: "hitwicket", name: "Hit Wicket" },
+        { id: "caught_bowled", name: "Caught & Bowled" },
+        { id: "obstructing", name: "Obstructing the Field" },
+        { id: "retiredout", name: "Retired Out" },
+        { id: "other", name: "Other" }
+      ]
+    },
+    {
+      type: "select",
+      label: "Shot Elevation",
+      key: "shotElevation",
+      options: [
+        { id: "all", name: "All" },
+        { id: "lofted", name: "Lofted" },
+        { id: "grounded", name: "Along the Ground" },
+      ],
+    },
     {
       type: "select", label: "Duration (sec)", key: "durationRange", options: [
         { id: "0-2", name: "0-2 sec" },
@@ -357,11 +412,12 @@ function Filters({ values, onChange, clips, players }) {
     { type: "select", label: "Ball Type", key: "ballType", options: ballTypes },
     { type: "select", label: "Direction", key: "direction", options: directionOptions },
     { type: "select", label: "Length Type", key: "lengthType", options: lengthTypes },
+    { type: "select", label: "Variation", key: "variation", options: variationTypes },
     { key: "connection", label: "Connection Type", type: "select", groups: connectionGroups },
     { type: "searchable", label: "Caught By", key: "caughtBy", options: uniqueFielders },
     { type: "searchable", label: "Run Out By", key: "runOutBy", options: uniqueFielders },
-    { type: "boolean", label: "Is Dropped", key: "isDropped" },
     { type: "searchable", label: "Dropped By", key: "droppedBy", options: uniqueFielders },
+    { type: "searchable", label: "Stumped By", key: "stumpedBy", options: uniqueFielders },
   ]
 
   // Define which filters are basic (show by default)
@@ -382,6 +438,7 @@ function Filters({ values, onChange, clips, players }) {
       f.key !== "caughtBy" &&
       f.key !== "runOutBy" &&
       f.key !== "droppedBy" &&
+      f.key !== "stumpedBy" &&
       filterMode === "advanced")
   );
 
@@ -400,18 +457,18 @@ function Filters({ values, onChange, clips, players }) {
           </Button>
         </div>
         <div className="bg-gradient-to-br from-blue-50 to-white shadow-md">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-cols-fr gap-4 p-4  rounded-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-cols-fr gap-4 py-8 px-2  rounded-xl">
             {/* Grouped: Is Catch + Caught By */}
 
 
             {/* Render the rest of your filters as before, skipping the above keys */}
             {visibleFilters.filter(f =>
-              !["caughtBy", "runOutBy", "droppedBy", "isCatch", "isRunout", "isDropped"].includes(f.key)
+              !["caughtBy", "runOutBy", "droppedBy", "catch", "runout", "isDropped"].includes(f.key)
             ).map((filter) => {
               if (filter.type === "select") {
                 return filter.groups
                   ?
-                  <div key={filter?.key} className="mb-4 w-full">
+                  <div key={filter?.key} className="mb-[-40px] w-full">
                     <Label className="mb-1 block text-blue-900 font-semibold tracking-wide">
                       {filter.label}
                     </Label>
@@ -464,7 +521,7 @@ function Filters({ values, onChange, clips, players }) {
               if (filter.type === "searchable") {
                 const selected = filter.options.find(o => o.id === values[filter.key])
                 return (
-                  <div key={filter.key} className="mb-2 w-full min-w-0">
+                  <div key={filter.key} className="w-full min-w-0 mb-[-20px]">
                     <FilterPopover onChange={onChange} filter={filter} selected={selected} />
                   </div>
                 )
@@ -488,19 +545,10 @@ function Filters({ values, onChange, clips, players }) {
             })}
           </div>
           {filterMode == "advanced" &&
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-cols-fr gap-4 p-4 rounded-xl shadow-md">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-cols-fr gap-2 p-2 rounded-xl shadow-md">
               {/* Grouped: Is Catch + Caught By */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center space-x-3 mb-2 p-2 bg-white/70 rounded-lg shadow-sm w-full min-w-0">
-                  <Switch
-                    id="isCatch"
-                    className="cursor-pointer focus:ring-2 focus:ring-blue-200"
-                    checked={values.isCatch || false}
-                    onCheckedChange={(value) => onChange("isCatch", value)}
-                  />
-                  <Label htmlFor="isCatch" className="text-blue-900 font-medium">Is Catch</Label>
-                </div>
-                {(values.isCatch === true || values.isWicket === true) && (
+                {(values.wicketType === "caught" || values.isWicket === true) && (
                   <div className="mb-2 w-full min-w-0">
                     <FilterPopover onChange={onChange} filter={filterConfig.find(f => f.key === "caughtBy")} selected={filterConfig.find(f => f.key === "caughtBy").options.find(o => o.id === values.caughtBy)} />
                   </div>
@@ -509,16 +557,7 @@ function Filters({ values, onChange, clips, players }) {
 
               {/* Grouped: Is Runout + Run Out By */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center space-x-3 mb-2 p-2 bg-white/70 rounded-lg shadow-sm w-full min-w-0">
-                  <Switch
-                    id="isRunout"
-                    className="cursor-pointer focus:ring-2 focus:ring-blue-200"
-                    checked={values.isRunout || false}
-                    onCheckedChange={(value) => onChange("isRunout", value)}
-                  />
-                  <Label htmlFor="isRunout" className="text-blue-900 font-medium">Is Runout</Label>
-                </div>
-                {values.isRunout === true && (
+                {values.wicketType === "runout" && (
                   <div className="mb-2 w-full min-w-0">
                     <FilterPopover onChange={onChange} filter={filterConfig.find(f => f.key === "runOutBy")} selected={filterConfig.find(f => f.key === "runOutBy").options.find(o => o.id === values.runOutBy)} />
                   </div>
@@ -527,18 +566,16 @@ function Filters({ values, onChange, clips, players }) {
 
               {/* Grouped: Is Dropped + Dropped By */}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center space-x-3 mb-2 p-2 bg-white/70 rounded-lg shadow-sm w-full min-w-0">
-                  <Switch
-                    id="isDropped"
-                    className="cursor-pointer focus:ring-2 focus:ring-blue-200"
-                    checked={values.isDropped || false}
-                    onCheckedChange={(value) => onChange("isDropped", value)}
-                  />
-                  <Label htmlFor="isDropped" className="text-blue-900 font-medium">Is Dropped</Label>
-                </div>
-                {values.isDropped === true && (
+                {values.event === "dropped" && (
                   <div className="mb-2 w-full min-w-0">
                     <FilterPopover onChange={onChange} filter={filterConfig.find(f => f.key === "droppedBy")} selected={filterConfig.find(f => f.key === "droppedBy").options.find(o => o.id === values.droppedBy)} />
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                {values.wicketType === "stumped" && (
+                  <div className="mb-2 w-full min-w-0">
+                    <FilterPopover onChange={onChange} filter={filterConfig.find(f => f.key === "stumpedBy")} selected={filterConfig.find(f => f.key === "stumpedBy").options.find(o => o.id === values.stumpedBy)} />
                   </div>
                 )}
               </div>

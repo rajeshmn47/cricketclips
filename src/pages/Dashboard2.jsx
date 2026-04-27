@@ -56,11 +56,7 @@ export default function Dashboard() {
   const [backendPlaylists, setBackendPlaylists] = useState([]); // backend playlists
   const [totalPages, setTotalPages] = useState(0);
   const [allPlayers, setAllPlayers] = useState([]);
-  const [total, setTotal] = useState(0);
   const [showMoreCommentary, setShowMoreCommentary] = useState(null);
-
-  // NEW: store selected playlist ID for modal
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
 
   // Fetch backend playlists for the logged-in user
   useEffect(() => {
@@ -108,7 +104,7 @@ export default function Dashboard() {
       setLoading(true);
       const params = {
         ...filterValues,
-        search: searchTerm,
+        searchTerm: searchTerm,
         page: currentPage,
         limit: itemsPerPage,
       };
@@ -121,7 +117,6 @@ export default function Dashboard() {
         return { ...clip, ...inferred }
       })
       setClips(enhancedClips);
-      setTotal(res.data.total);
       setTotalPages(res.data.totalPages)
       //setClips(clipsWithDuration);
     } catch (err) {
@@ -158,12 +153,10 @@ export default function Dashboard() {
   };
 
   const handleDownloadSelected = () => {
-    selectedClipIds.forEach((clipId) => {
-      const clip = clips.find(c => c._id === clipId);
-      if (!clip) return;
+    selectedClipIds.forEach((clip) => {
       const link = document.createElement("a");
-      link.href = `${URL}/mockvideos/${clip.clip}`;
-      link.download = clip.clip;
+      link.href = `${URL}/mockvideos/${clip}`;
+      link.download = clip;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -173,13 +166,11 @@ export default function Dashboard() {
 
   const handleMergeAndDownload = async () => {
     setLoading(true)
-    // map selected IDs to actual filenames
-    console.log(selectedClipIds, 'selectedClipIds')
-    const selectedFilenames = selectedClipIds
+    const selectedClipsObjects = selectedClipIds
     const response = await fetch(`${NEW_URL}/auth/merge`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clips: selectedFilenames, quality: selectedQuality }),
+      body: JSON.stringify({ clips: selectedClipsObjects, quality: selectedQuality }),
     });
     console.log(response, 'res');
     const res = await response.json()
@@ -220,35 +211,30 @@ export default function Dashboard() {
     )
   }
 
-  const toggleSelect = (clipId) => {
+  const toggleSelect = (clip) => {
+    console.log(clip, selectedClipIds, 'toggle clip')
     setSelectedClipIds((prev) =>
-      prev.includes(clipId)
-        ? prev.filter(id => id !== clipId)
-        : [...prev, clipId]
+      prev.find((p) => p == clip) // use unique id
+        ? prev.filter((cl) => cl !== clip)
+        : [...prev, clip]
     );
+    console.log('completed toggle')
   };
 
   const deleteSelected = async () => {
-    if (!confirm("Delete all selected clips?")) return;
-    // send IDs (they are _id strings)
-    await axios.post(`${URL}/auth/delete-multiple`, { clips: selectedClipIds });
-    setClips(prev => prev.filter(c => !selectedClipIds.includes(c._id)));
-    setSelectedClipIds([]);
-  };
+    if (!confirm("Delete all selected clips?")) return
+    setTimeout(() => {
+      setClips(prev => prev.filter(c => !selectedClipIds.includes(c.clip)))
+      setSelectedClipIds([])
+    }, 300)
+    await axios.post(`${URL}/auth/delete-multiple`, { clips: selectedClipIds })
+  }
 
   const handleDelete = async (clip) => {
     //if (!confirm("Delete all selected clips?")) return
     await axios.delete(`${URL}/auth/delete-clip/${clip._id}`);
     setClips(prev => prev.filter(c => c._id !== clip._id));
   }
-
-  const clearFilters = () => {
-    setFilterValues({});
-    setSearchTerm('');
-    setCurrentPage(1);
-    // If you have any other filter‑related state like selectedFilters, reset it too:
-    // setSelectedFilters(undefined);
-  };
 
   const handleAddToPlayliste = () => {
     if (!playlistName || selectedClipIds.length === 0) return;
@@ -289,56 +275,37 @@ export default function Dashboard() {
     setShowPlaylistModal(false);
   };
 
-  // FIXED: Add clips to backend playlist (create OR update)
+  // Add clips to backend playlist (create or update)
   const handleAddToPlaylist = async () => {
-    if (selectedPlaylistId === "") {
-      alert("Please select a playlist or choose 'Create New'.");
+    const finalName =
+      playlistName === "__new__" ? newPlaylistName.trim() : playlistName;
+
+    if (!finalName) {
+      alert("Please enter a valid playlist name.");
       return;
     }
 
     try {
-      if (selectedPlaylistId === "__new__") {
-        const finalName = newPlaylistName.trim();
-        if (!finalName) {
-          alert("Please enter a playlist name.");
-          return;
-        }
-        // Create new playlist
-        await API.post(`${URL}/clips/playlists/create`, {
-          title: finalName,
-          videos: selectedClipIds,
-          createdBy: user?._id,
-        });
-        alert("New playlist created and clips added!");
-      } else {
-        // Update existing playlist: merge videos
-        const targetPlaylist = backendPlaylists.find(p => p._id === selectedPlaylistId);
-        if (!targetPlaylist) {
-          alert("Playlist not found.");
-          return;
-        }
-        const mergedVideos = Array.from(new Set([...targetPlaylist.videos, ...selectedClipIds]));
-        await API.put(`${URL}/clips/playlists/update/${selectedPlaylistId}`, {
-          videos: mergedVideos,
-        });
-        alert("Clips added to existing playlist!");
-      }
-
+      await API.post(`${URL}/clips/playlists/create`, {
+        title: finalName,
+        videos: selectedClipIds,
+        createdBy: user?._id,
+      });
       // Refetch playlists after saving
       const res = await API.get(`${URL}/clips/playlists/all`, {
         params: user?._id ? { createdBy: user._id } : undefined,
       });
       setBackendPlaylists(res.data || []);
 
-      // Reset modal state
-      setSelectedPlaylistId("");
+      setPlaylistName("");
       setNewPlaylistName("");
       setShowPlaylistModal(false);
+      alert("Playlist saved to backend!");
     } catch (err) {
-      console.error(err);
-      alert("Failed to save playlist. Check console for details.");
+      alert("Failed to save playlist to backend.");
     }
   };
+
 
   //console.log(filterValues, clips, 'filterValues');
   //console.log(filteredClips, 'filteredClips');
@@ -355,21 +322,26 @@ export default function Dashboard() {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 drop-shadow-sm text-center sm:text-left tracking-tight leading-tight mb-1">Cricket Clips Dashboard</h1>
           <span className="text-xs sm:text-sm text-blue-700 font-medium tracking-wide opacity-80">AI-powered search &amp; video management</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <form onSubmit={(e) => handleSearch(e)} className="flex items-center flex-1 bg-white/90 rounded-lg shadow-sm border border-blue-200 px-2 py-1 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
-            <Search className="text-blue-400 mr-2 w-5 h-5" />
-            <Input
-              placeholder="Search clips, players, events..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 bg-transparent border-0 focus:ring-0 text-sm sm:text-base placeholder:text-blue-300 focus:outline-none focus-visible:ring-0 focus-visible:outline-none"
-            />
-            <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm">Search</button>
-          </form>
-          <Button variant="outline" onClick={clearFilters} className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap">
-            Clear Filters
-          </Button>
-        </div>
+        <form
+          onSubmit={(e) => handleSearch(e)}
+          className="flex items-center w-full sm:w-auto max-w-lg bg-white/90 rounded-lg shadow-sm border border-blue-200 px-2 py-1 focus-within:ring-2 focus-within:ring-blue-200 transition-all"
+        >
+          <Search className="text-blue-400 mr-2 w-5 h-5" />
+
+          <Input
+            placeholder="Search clips, players, events..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 bg-transparent border-0 focus:ring-0 text-sm sm:text-base placeholder:text-blue-300"
+          />
+
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
+          >
+            Search
+          </button>
+        </form>
       </div>
       {/* Video Quality Selector */}
       <div className="w-full flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
@@ -403,11 +375,11 @@ export default function Dashboard() {
         <div className="flex flex-col xs:flex-row flex-wrap gap-2 flex-1 justify-end">
           <label className="text-xs sm:text-sm font-medium text-gray-700">Select All:</label>
           <div className="flex gap-2 justify-between">
-            {/* Select All Button - FIXED to use _id */}
+            {/* Select All Button */}
             <Button
               variant="outline"
               disabled={selectedClipIds.length === filteredClips?.length}
-              onClick={() => setSelectedClipIds(filteredClips.map((clip) => clip._id))}
+              onClick={() => setSelectedClipIds(filteredClips.map((clip) => clip.clip))}
               className="border-blue-300 hover:bg-blue-50 text-xs sm:text-base w-1/2"
             >
               Select All
@@ -455,7 +427,7 @@ export default function Dashboard() {
       )}
       <div className="flex flex-wrap items-center gap-4 justify-between mb-2">
         <p className="text-sm text-muted-foreground">
-          {total} item{total !== 1 && "s"} selected
+          {itemsPerPage * totalPages} item{filteredClips.length !== 1 && "s"} selected
         </p>
         <div className="flex items-center gap-2">
           <label htmlFor="itemsPerPage" className="text-sm text-gray-700 font-medium">Items per page:</label>
@@ -491,7 +463,7 @@ export default function Dashboard() {
             <CardContent className='relative space-y-1 pt-2'>
               <p className="font-semibold text-base sm:text-lg text-blue-900">{clip.batsman}</p>
               <p className="text-xs sm:text-sm text-gray-600">vs {clip.bowler}</p>
-              <p className="text-xs sm:text-sm font-medium text-blue-600 w-full truncate">{clip.event}</p>
+              <p className="text-xs sm:text-sm font-medium text-blue-600">{clip.event}</p>
               <div className='flex flex-wrap gap-2'>
                 {clip?.labels?.shotType && <Button variant="secondary"
                   size="sm"
@@ -659,7 +631,6 @@ export default function Dashboard() {
           </DialogContent>
         </Dialog>
       )}
-      {/* FIXED Playlist Modal */}
       {showPlaylistModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
@@ -670,19 +641,19 @@ export default function Dashboard() {
             </label>
             <select
               className="w-full border px-3 py-2 rounded mb-2"
-              value={selectedPlaylistId}
-              onChange={(e) => setSelectedPlaylistId(e.target.value)}
+              value={playlistName}
+              onChange={(e) => setPlaylistName(e.target.value)}
             >
               <option value="">-- Select Playlist --</option>
               {backendPlaylists.map((pl) => (
-                <option key={pl._id} value={pl._id}>
+                <option key={pl._id} value={pl.title}>
                   {pl.title}
                 </option>
               ))}
               <option value="__new__">➕ Create New Playlist</option>
             </select>
 
-            {selectedPlaylistId === "__new__" && (
+            {playlistName === "__new__" && (
               <input
                 type="text"
                 placeholder="Enter New Playlist Name"
@@ -695,11 +666,7 @@ export default function Dashboard() {
             <div className="flex justify-end gap-2">
               <Button
                 variant="secondary"
-                onClick={() => {
-                  setShowPlaylistModal(false);
-                  setSelectedPlaylistId("");
-                  setNewPlaylistName("");
-                }}
+                onClick={() => setShowPlaylistModal(false)}
               >
                 Cancel
               </Button>
@@ -707,8 +674,8 @@ export default function Dashboard() {
                 variant="default"
                 onClick={handleAddToPlaylist}
                 disabled={
-                  selectedPlaylistId === "" ||
-                  (selectedPlaylistId === "__new__" && !newPlaylistName.trim())
+                  playlistName === "" ||
+                  (playlistName === "__new__" && !newPlaylistName.trim())
                 }
               >
                 ➕ Add

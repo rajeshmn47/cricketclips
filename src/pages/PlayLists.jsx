@@ -1,72 +1,77 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button"; // Adjust this path if needed
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Trash2, PlayCircle, Download } from "lucide-react";
-import { NEW_URL } from "./../constants/userConstants"; // Adjust this import based on your project structure
+import { NEW_URL, URL } from "./../constants/userConstants"; // Add URL if not present
+import { API } from "../actions/userAction"; // Make sure this is the correct import
 
 const PlaylistsPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [playlists, setPlaylists] = useState({});
+    const [playlists, setPlaylists] = useState([]);
     const [expandedPlaylist, setExpandedPlaylist] = useState(null);
     const [selectedClips, setSelectedClips] = useState([]);
     const [selectedQuality, setSelectedQuality] = useState('240p');
     const [isEditing, setIsEditing] = useState(false);
-    const [editingPlaylistTitle, setEditingPlaylistTitle] = useState("");
+    const [editingPlaylist, setEditingPlaylist] = useState("");
     const [newTitle, setNewTitle] = useState("");
     const [editableClips, setEditableClips] = useState([]);
     const [showMobileModal, setShowMobileModal] = useState(false);
 
     const videoSrc = `${NEW_URL}/${selectedQuality == '240p' ? 'mockvideos' : selectedQuality == '360p' ? '360p' : '720p'}`;
 
+    // Fetch playlists from backend on mount
     useEffect(() => {
-        const allKeys = Object.keys(localStorage);
-        const loaded = {};
-
-        allKeys.forEach((key) => {
-            try {
-                const value = JSON.parse(localStorage.getItem(key));
-                if (Array.isArray(value)) {
-                    loaded[key] = value;
-                }
-            } catch (e) {
-                console.warn(`Skipping invalid JSON in localStorage key "${key}":`, e.message);
-            }
-        });
-
-        setPlaylists(loaded);
-
+        fetchPlaylists();
     }, []);
 
-    const handleDelete = (playlistName) => {
-        if (window.confirm(`Delete playlist "${playlistName}"?`)) {
-            localStorage.removeItem(playlistName);
-            setPlaylists((prev) => {
-                const copy = { ...prev };
-                delete copy[playlistName];
-                return copy;
-            });
+    const handleDelete = async (playlist) => {
+        if (window.confirm(`Delete playlist "${playlist.title}"?`)) {
+            try {
+                await API.delete(`${URL}/clips/playlists/delete/${playlist?._id}`);
+
+            } catch (e) {
+                alert("Failed to delete playlist.");
+            }
         }
     };
 
+    const fetchPlaylists = async () => {
+        setLoading(true);
+        try {
+            const res = await API.get(`${URL}/clips/playlists/all`);
+            // Expecting res.data to be an array of { title, videos }
+            const loaded = {};
+            (res.data || []).forEach(pl => {
+                if (pl.title && Array.isArray(pl.videos)) loaded[pl.title] = pl.videos;
+            });
+            setPlaylists([...res?.data]);
+        } catch (e) {
+            setPlaylists({});
+        }
+        setLoading(false);
+    };
+
     const handleDownloadAll = (clips) => {
-        // Simulated download – replace with actual download logic
         clips.forEach((clip) => {
-            console.log("Downloading", clip);
+            const link = document.createElement("a");
+            link.href = `${NEW_URL}/mockvideos/${clip.clip}`;
+            link.download = clip.clip;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
-        alert("Download started (simulated).");
     };
 
     const handleMergeAndDownload = async (clips) => {
         setLoading(true)
-        const response = await fetch(`${NEW_URL}/auth/merge`, {
+        const response = await fetch(`${NEW_URL}/auth/merge-clips`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ clips: clips?.map((m) => m.clip), quality: selectedQuality }),
         });
-        console.log(response, selectedClips, 'res');
         const res = await response.json()
-        console.log(res, 'res');
         const downloadUrl = `${videoSrc}/${res.file}`;
         const a = document.createElement('a');
         a.target = '_blank';
@@ -78,15 +83,30 @@ const PlaylistsPage = () => {
         setLoading(false)
     };
 
-    const handleSave = () => {
-        if (newTitle !== editingPlaylistTitle) {
-            localStorage.removeItem(editingPlaylistTitle);
+    const handleSave = async () => {
+        try {
+            await API.put(`${URL}/clips/playlists/update/${editingPlaylist?._id}`, {
+                title: newTitle,
+                videos: editableClips.map(c => c._id || c.clip || c),
+            });
+            // Refetch playlists after save
+            const res = await API.get(`${URL}/clips/playlists/all`);
+            const loaded = {};
+            (res.data || []).forEach(pl => {
+                if (pl.title && Array.isArray(pl.videos)) loaded[pl.title] = pl.videos;
+            });
+            setPlaylists([...res.data]);
+            setIsEditing(false);
+        } catch (e) {
+            alert("Failed to save playlist.");
         }
-        localStorage.setItem(
-            newTitle,
-            JSON.stringify([...editableClips])
-        );
-    }
+    };
+
+    const handleShare = (playlist) => {
+        const shareableUrl = `${window.location.origin}/shared-playlist/${playlist._id}`;
+        navigator.clipboard.writeText(shareableUrl);
+        alert('Playlist link copied to clipboard!');
+    };
 
     return (
         <div className="p-4 sm:p-6 min-h-screen bg-gradient-to-br from-blue-50 to-white space-y-6">
@@ -97,50 +117,49 @@ const PlaylistsPage = () => {
                 </Button>
             </div>
 
-            {Object.keys(playlists).length === 0 ? (
+            {loading ? (
+                <p className="text-gray-500 text-center">Loading playlists...</p>
+            ) : Object.keys(playlists).length === 0 ? (
                 <p className="text-gray-500 text-center">No playlists found.</p>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
             )}
             <div className="flex flex-col sm:flex-row gap-4 p-4 min-h-screen bg-gradient-to-br from-blue-50 to-white">
                 {/* Left Sidebar: Playlists */}
                 <div className="sm:w-1/3 w-full space-y-4">
-                    {Object.entries(playlists).map(([title, clips]) => (
+                    {playlists.map((playlist) => (
                         <div
-                            key={title}
+                            key={playlist?._id}
                             className="border border-blue-200 rounded-xl p-4 shadow-md bg-white hover:shadow-lg transition duration-200"
                         >
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <h2 className="text-base sm:text-sm font-semibold text-blue-800 truncate w-full">
-                                        🎬 {title}
+                                        🎬 {playlist?.title}
                                     </h2>
                                     <div className="text-xs text-gray-500 whitespace-nowrap">
-                                        {clips.length} clip{clips.length !== 1 ? 's' : ''}
+                                        {playlist?.videos?.length} clip{playlist?.videos?.length !== 1 ? 's' : ''}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => {
-                                            setExpandedPlaylist(title);
-                                            setSelectedClips(clips);
+                                            setExpandedPlaylist(playlist);
+                                            setSelectedClips(playlist?.videos);
                                             if (window.innerWidth < 640) {
-                                                // sm breakpoint
                                                 setShowMobileModal(true);
                                             }
                                         }}
-                                        className="text-sm px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition"
+                                        className="flex text-sm px-1 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition"
                                         title="View playlist clips"
                                     >
                                         👁️ View
                                     </button>
                                     <button
                                         onClick={() => {
-                                            handleMergeAndDownload(clips)
+                                            handleMergeAndDownload(playlist.videos)
                                         }}
-                                        className="text-sm px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition"
+                                        className="flex flex-row text-sm px-1 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition"
                                         title="Download all clips"
                                     >
                                         📥 Download
@@ -148,20 +167,32 @@ const PlaylistsPage = () => {
                                     <button
                                         onClick={() => {
                                             setIsEditing(true);
-                                            setEditingPlaylistTitle(title);
-                                            setNewTitle(title);
-                                            setEditableClips([...clips]);
+                                            setEditingPlaylist(playlist);
+                                            setNewTitle(playlist?.title);
+                                            setEditableClips([...playlist?.videos]);
                                         }}
-                                        className="text-sm px-2 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-md transition"
+                                        className="text-sm px-1 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-md transition"
                                     >
                                         ✏️ Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(playlist)}
+                                        className="text-sm px-1 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition"
+                                        title="Delete playlist"
+                                    >
+                                        🗑️ Delete
+                                    </button>
+                                    <button
+                                        onClick={() => handleShare(playlist)}
+                                        className="flex text-sm px-1 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition"
+                                        title="Delete playlist"
+                                    >
+                                        🔗 Share
                                     </button>
                                 </div>
                             </div>
                         </div>
                     ))}
-
-
                 </div>
 
                 {/* Right Panel: Clips */}
@@ -169,10 +200,10 @@ const PlaylistsPage = () => {
                     {expandedPlaylist ? (
                         <>
                             <h3 className="text-lg font-bold text-blue-700 mb-3">
-                                🎥 Clips in "{expandedPlaylist}"
+                                🎥 Clips in "{expandedPlaylist?.title}"
                             </h3>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                {selectedClips.map((clip, i) => (
+                                {selectedClips?.map((clip, i) => (
                                     <div
                                         key={i}
                                         className="relative rounded-lg overflow-hidden shadow-md group hover:shadow-lg transition"
@@ -246,14 +277,7 @@ const PlaylistsPage = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => {
-                                    const updated = { ...playlists };
-                                    delete updated[editingPlaylistTitle];
-                                    updated[newTitle] = editableClips;
-                                    setPlaylists(updated);
-                                    setIsEditing(false);
-                                    handleSave()
-                                }}
+                                onClick={handleSave}
                                 className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
                             >
                                 ✅ Save Changes
@@ -279,7 +303,7 @@ const PlaylistsPage = () => {
                             {selectedClips.map((clipUrl, i) => (
                                 <video
                                     key={i}
-                                    src={`${NEW_URL}/mockvideos/${clipUrl}`}
+                                    src={`${NEW_URL}/mockvideos/${clipUrl.clip || clipUrl}`}
                                     controls
                                     className="rounded-lg shadow"
                                 />
