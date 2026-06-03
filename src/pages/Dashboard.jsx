@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader } from "@/components/ui/dialog"
-import { Filter, Search } from 'lucide-react';
+import { Filter, LogOut, Search, User } from 'lucide-react';
 import Filters from '../components/Filters';
 import { Switch } from '../components/ui/switch';
-import { API } from '../actions/userAction';
+import { API, logout } from '../actions/userAction';
 import { HTTPS_URL, NEW_URL, URL } from '../constants/userConstants';
 import axios from 'axios';
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog';
@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loadUser } from '../actions/userAction';
 import cricketSynonyms from '../utils/cricket_synonyms.json';
 import exclusionMap from '../utils/exclusion_map.json';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const filters = [
   'Match', 'Player', 'Shot Type', 'Over', 'Ball', 'Batting Team', 'Bowler', 'Striker', 'Non-Striker',
@@ -30,7 +30,41 @@ export default function Dashboard() {
   const { user } = useSelector(state => state.user || {});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState();
-  const [filterValues, setFilterValues] = useState({});
+  // Read URL params once, synchronously, before first render
+  const getInitialFilters = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    // All filter keys used across the platform (matches filterConfig, plus screen‑specific ones)
+    const filterKeys = [
+      // Core player/team filters
+      "batsman", "bowler", "player", "fielder",
+      "batting_team", "bowling_team",
+      // Hand and type filters
+      "battingHand", "bowlingHand", "bowlerType",
+      // Match context
+      "series", "seriesId", "season", "format", "league", "type", "venue",
+      // Event & dismissal
+      "event", "wicketType", "shotElevation", "durationRange",
+      // Technical labels
+      "shotType", "ballType", "direction", "lengthType", "variation", "connection",
+      // Fielder participation
+      "caughtBy", "runOutBy", "droppedBy", "stumpedBy",
+      // Numeric thresholds
+      "minBalls", "minCatches", "minRunouts", "minDismissals",
+      // Over range
+      "overRange",
+      // Search
+      "search"
+    ];
+
+    const filters = {};
+    for (const key of filterKeys) {
+      const value = params.get(key);
+      if (value) filters[key] = value;
+    }
+    return filters;
+  };
+  const [filterValues, setFilterValues] = useState(getInitialFilters);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false); // Simulating super admin status
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedClip, setSelectedClip] = useState(null);
@@ -58,7 +92,7 @@ export default function Dashboard() {
   const [allPlayers, setAllPlayers] = useState([]);
   const [total, setTotal] = useState(0);
   const [showMoreCommentary, setShowMoreCommentary] = useState(null);
-
+  const [searchParams, setSearchParams] = useSearchParams(); // NEW
   // NEW: store selected playlist ID for modal
   const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
 
@@ -340,6 +374,11 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
   //console.log(filterValues, clips, 'filterValues');
   //console.log(filteredClips, 'filteredClips');
 
@@ -351,12 +390,20 @@ export default function Dashboard() {
         </div>
       )}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 px-2 sm:px-4 rounded-xl bg-gradient-to-r from-blue-100/80 to-white/80 shadow-md border border-blue-100 mb-2">
+        {/* Left: Title */}
         <div className="flex flex-col items-center sm:items-start w-full sm:w-auto">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 drop-shadow-sm text-center sm:text-left tracking-tight leading-tight mb-1">Cricket Clips Dashboard</h1>
-          <span className="text-xs sm:text-sm text-blue-700 font-medium tracking-wide opacity-80">AI-powered search &amp; video management</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 drop-shadow-sm text-center sm:text-left tracking-tight leading-tight mb-1">
+            Cricket Clips Dashboard
+          </h1>
+          <span className="text-xs sm:text-sm text-blue-700 font-medium tracking-wide opacity-80">
+            AI-powered search & video management
+          </span>
         </div>
+
+        {/* Right: User & Actions */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <form onSubmit={(e) => handleSearch(e)} className="flex items-center flex-1 bg-white/90 rounded-lg shadow-sm border border-blue-200 px-2 py-1 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
+          {/* Search Form */}
+          <form onSubmit={handleSearch} className="flex items-center flex-1 bg-white/90 rounded-lg shadow-sm border border-blue-200 px-2 py-1 focus-within:ring-2 focus-within:ring-blue-200 transition-all">
             <Search className="text-blue-400 mr-2 w-5 h-5" />
             <Input
               placeholder="Search clips, players, events..."
@@ -364,11 +411,34 @@ export default function Dashboard() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1 bg-transparent border-0 focus:ring-0 text-sm sm:text-base placeholder:text-blue-300 focus:outline-none focus-visible:ring-0 focus-visible:outline-none"
             />
-            <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm">Search</button>
+            <button type="submit" className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition">
+              Search
+            </button>
           </form>
+
           <Button variant="outline" onClick={clearFilters} className="border-red-300 text-red-600 hover:bg-red-50 whitespace-nowrap">
             Clear Filters
           </Button>
+
+          {/* User info & Logout */}
+          {user && (
+            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-blue-200">
+              <div className="hidden sm:flex items-center gap-1 text-blue-800">
+                <User size={16} />
+                <span className="text-sm font-medium truncate max-w-[120px]">
+                  {user.username || user.email?.split("@")[0]}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-sm"
+                title="Logout"
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
       {/* Video Quality Selector */}

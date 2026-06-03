@@ -40,8 +40,8 @@ export const register = (myform) => async (dispatch) => {
   try {
     console.log(myform);
     dispatch({ type: REGISTER_USER_REQUEST });
-    const { data } = await axios.post(`${URL}/auth/register`, {
-      myform,
+    const { data } = await axios.post(`${URL}/auth/registerold`, {
+      ...myform,
     });
     localStorage.setItem('server_token', data.server_token);
     dispatch({ type: REGISTER_USER_SUCCESS, payload: data.user });
@@ -121,3 +121,5 @@ export const loadUser = () => async (dispatch) => {
     console.log(error);
   }
 };
+
+export const clearErrors = () => ({ type: CLEAR_ERRORS });
