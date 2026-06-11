@@ -1,3 +1,5 @@
+https://github.com/user-attachments/assets/5289dcfd-e12b-43c3-843c-c501995bc8a0
+
 # CricketClips
 
 CricketClips is a cricket video search and retrieval platform designed to help fans, analysts, coaches, and content creators quickly find specific deliveries, shots, wickets, and moments from cricket matches.
@@ -21,10 +23,6 @@ Search for deliveries using filters such as:
 ### Event-Based Search
 
 Find deliveries based on:
-
-
-https://github.com/user-attachments/assets/5289dcfd-e12b-43c3-843c-c501995bc8a0
-
 
 * Wickets
 * Dot balls
