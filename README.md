@@ -22,6 +22,10 @@ Search for deliveries using filters such as:
 
 Find deliveries based on:
 
+
+https://github.com/user-attachments/assets/5289dcfd-e12b-43c3-843c-c501995bc8a0
+
+
 * Wickets
 * Dot balls
 * Boundaries
