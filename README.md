@@ -1,5 +1,3 @@
-https://github.com/user-attachments/assets/5289dcfd-e12b-43c3-843c-c501995bc8a0
-
 # CricketClips
 
 CricketClips is a cricket video search and retrieval platform designed to help fans, analysts, coaches, and content creators quickly find specific deliveries, shots, wickets, and moments from cricket matches.
@@ -114,6 +112,6 @@ The long-term goal of CricketClips is to make cricket searchable at the delivery
 
 ## Author
 
-Rajesh M N
-
-GitHub: https://github.com/rajeshmn47
+Rajesh M N  
+GitHub: [https://github.com/rajeshmn47](https://github.com/rajeshmn47)  
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/rajeshmn47)
