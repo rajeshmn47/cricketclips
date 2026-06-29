@@ -7,8 +7,12 @@ export default function SearchableFilter({ filter, selected, onChange }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (selected && selected.name !== query) {
+    console.log(selected, "selected");
+    if (selected) {
       setQuery(selected.name);
+    }
+    else {
+      setQuery("")
     }
   }, [selected]);
 
@@ -25,10 +29,8 @@ export default function SearchableFilter({ filter, selected, onChange }) {
   }, []);
 
   const filteredOptions = filter.options.filter((opt) =>
-    opt.name.toLowerCase().includes(query.toLowerCase().trim())
+    opt?.name?.toLowerCase().includes(query.toLowerCase().trim())
   );
-
-  console.log("filteredOptions", filteredOptions);
 
   return (
     <div className="relative w-full" ref={containerRef}>

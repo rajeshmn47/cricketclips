@@ -95,6 +95,7 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams(); // NEW
   // NEW: store selected playlist ID for modal
   const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
+  const [newPlaylistVisibility, setNewPlaylistVisibility] = useState('public');
 
   // Fetch backend playlists for the logged-in user
   useEffect(() => {
@@ -129,7 +130,7 @@ export default function Dashboard() {
   const paginatedClips = clips;
 
   // Only show admin controls if user is logged in and user.role is 'admin'
-  const isAdmin = user && user.role === "user";
+  const isAdmin = user && user.role === "admin";
   console.log(user, 'user')
 
   useEffect(() => {
@@ -283,6 +284,8 @@ export default function Dashboard() {
     // If you have any other filter‑related state like selectedFilters, reset it too:
     // setSelectedFilters(undefined);
   };
+
+  console.log(filterValues, "filtervalues")
 
   const handleAddToPlayliste = () => {
     if (!playlistName || selectedClipIds.length === 0) return;
@@ -753,13 +756,40 @@ export default function Dashboard() {
             </select>
 
             {selectedPlaylistId === "__new__" && (
-              <input
-                type="text"
-                placeholder="Enter New Playlist Name"
-                value={newPlaylistName}
-                onChange={(e) => setNewPlaylistName(e.target.value)}
-                className="w-full border px-3 py-2 rounded mb-4"
-              />
+              <>
+                <input
+                  type="text"
+                  placeholder="Enter New Playlist Name"
+                  value={newPlaylistName}
+                  onChange={(e) => setNewPlaylistName(e.target.value)}
+                  className="w-full border px-3 py-2 rounded mb-4"
+                />
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Visibility</label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="public"
+                        checked={newPlaylistVisibility === 'public'}
+                        onChange={() => setNewPlaylistVisibility('public')}
+                      />
+                      <span>Public (anyone can view)</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        value="private"
+                        checked={newPlaylistVisibility === 'private'}
+                        onChange={() => setNewPlaylistVisibility('private')}
+                      />
+                      <span>Private (only you)</span>
+                    </label>
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="flex justify-end gap-2">

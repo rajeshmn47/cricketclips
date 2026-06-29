@@ -17,6 +17,7 @@ export default function Register() {
         phoneNumber: '',
         password: '',
         confirmPassword: '',
+        appType: 'cricketclips',
     });
 
     const [passwordError, setPasswordError] = useState('');
@@ -43,7 +44,7 @@ export default function Register() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const { username, email, phoneNumber, password, confirmPassword } = formData;
+        const { username, email, phoneNumber, password, confirmPassword, appType } = formData;
 
         if (password !== confirmPassword) {
             setPasswordError('Passwords do not match');
@@ -56,7 +57,7 @@ export default function Register() {
             return;
         }
 
-        dispatch(register({ username, email, phoneNumber, password }));
+        dispatch(register({ username, email, phoneNumber, password, appType }));
     };
 
     return (

@@ -30,6 +30,8 @@ function Filters({ values, onChange, clips, players }) {
   const [filterMode, setFilterMode] = useState("basic"); // 'basic' or 'advanced'
   const [seriesOptions, setSeriesOptions] = useState([]);
   const [seriesLoading, setSeriesLoading] = useState(false);
+  console.log(players, "players exist");
+  players = Array.from(new Set(players))
 
   useEffect(() => {
     const fetchSeries = async () => {
@@ -51,28 +53,27 @@ function Filters({ values, onChange, clips, players }) {
     setOpenMap((prev) => ({ ...prev, [key]: !value }));
   };
 
-
   const uniqueBatsmen = players?.map((player) => ({
-    id: player?.name?.toLowerCase(),
-    name: player.name,
+    id: player,
+    name: player,
   }));
 
   const uniqueBowler = players?.map((player) => ({
-    id: player?.name?.toLowerCase(),
-    name: player.name,
+    id: player,
+    name: player,
   }));
 
   let alluniqueplayers = players?.map((player) => ({
-    id: player?.name?.toLowerCase(),
-    name: player.name,
+    id: player,
+    name: player
   }));
 
   // Extract unique fielders for the "Caught By" filter
   const uniqueFielders = Array.from(
     new Set(alluniqueplayers)
   ).map((name) => ({
-    id: name?.name?.toLowerCase(),
-    name: name?.name,
+    id: name.id,
+    name: name.name,
   }));
 
   const shotTypes = [
@@ -371,7 +372,6 @@ function Filters({ values, onChange, clips, players }) {
         { id: "other", name: "Other" }
       ]
     },
-    { type: "select", label: "Over Range", key: "overRange", options: [{ id: "1-6", name: "1-6" }, { id: "7-15", name: "7-15" }, { id: "16-20", name: "16-20" }] },
     {
       type: "select",
       label: "Wicket Type",
@@ -390,6 +390,7 @@ function Filters({ values, onChange, clips, players }) {
         { id: "other", name: "Other" }
       ]
     },
+    { type: "select", label: "Over Range", key: "overRange", options: [{ id: "1-6", name: "1-6" }, { id: "7-15", name: "7-15" }, { id: "16-20", name: "16-20" }] },
     {
       type: "select",
       label: "Shot Elevation",

@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Trash2, PlayCircle, Download } from "lucide-react";
 import { NEW_URL, URL } from "./../constants/userConstants"; // Add URL if not present
 import { API } from "../actions/userAction"; // Make sure this is the correct import
+import { useSelector } from "react-redux";
 
 const PlaylistsPage = () => {
     const navigate = useNavigate();
+    const { user } = useSelector(state => state.user || {});
     const [loading, setLoading] = useState(false);
     const [playlists, setPlaylists] = useState([]);
     const [expandedPlaylist, setExpandedPlaylist] = useState(null);
