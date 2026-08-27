@@ -1,3 +1,5 @@
+<img width="1920" height="1008" alt="Screenshot 2026-08-27 155303" src="https://github.com/user-attachments/assets/fb26f05e-fb5b-4dd3-9e77-b88b2295afe7" />
+<img width="1920" height="1008" alt="Screenshot 2026-08-27 155248" src="https://github.com/user-attachments/assets/38be7ceb-512d-465f-b1b3-c455d8537da5" />
 # CricketClips
 
 CricketClips is a cricket video search and retrieval platform designed to help fans, analysts, coaches, and content creators quickly find specific deliveries, shots, wickets, and moments from cricket matches.
