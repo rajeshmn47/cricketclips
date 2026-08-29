@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import Support from './pages/Support';
 import SharedPlaylistPage from './pages/SharedPlaylists';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import { ToastBar, Toaster } from 'react-hot-toast';
 import PublicPlaylists from './pages/PublicPlaylists';
 
@@ -40,6 +41,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PlaylistsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

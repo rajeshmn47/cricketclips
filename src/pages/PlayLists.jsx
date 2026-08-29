@@ -19,6 +19,7 @@ const PlaylistsPage = () => {
     const [newTitle, setNewTitle] = useState("");
     const [editableClips, setEditableClips] = useState([]);
     const [showMobileModal, setShowMobileModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const videoSrc = `${NEW_URL}/${selectedQuality == '240p' ? 'mockvideos' : selectedQuality == '360p' ? '360p' : '720p'}`;
 
@@ -110,26 +111,59 @@ const PlaylistsPage = () => {
         alert('Playlist link copied to clipboard!');
     };
 
+    const filteredPlaylists = playlists.filter((playlist) => {
+        const term = searchTerm.trim().toLowerCase();
+        if (!term) return true;
+
+        return (
+            (playlist?.title || '').toLowerCase().includes(term) ||
+            (playlist?.videos || []).some((clip) => {
+                const text = `${clip?.batsman || ''} ${clip?.bowler || ''} ${clip?.event || ''} ${clip?.match || ''}`.toLowerCase();
+                return text.includes(term);
+            })
+        );
+    });
+
     return (
         <div className="p-4 sm:p-6 min-h-screen bg-gradient-to-br from-blue-50 to-white space-y-6">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <h1 className="text-2xl sm:text-3xl font-bold text-blue-900">🎬 Your Playlists</h1>
                 <Button onClick={() => navigate(-1)} className="text-sm">
                     🔙 Back
                 </Button>
             </div>
 
+            <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <div>
+                        <p className="text-xs uppercase tracking-wide text-blue-600 font-semibold">Playlist summary</p>
+                        <p className="text-lg font-bold text-blue-900">
+                            {filteredPlaylists.length} of {playlists.length} playlists
+                        </p>
+                    </div>
+                </div>
+                <label className="block text-sm font-medium text-blue-800 mb-2">Search playlists</label>
+                <input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by playlist name or clip details..."
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm"
+                />
+            </div>
+
             {loading ? (
                 <p className="text-gray-500 text-center">Loading playlists...</p>
-            ) : Object.keys(playlists).length === 0 ? (
+            ) : playlists.length === 0 ? (
                 <p className="text-gray-500 text-center">No playlists found.</p>
+            ) : filteredPlaylists.length === 0 ? (
+                <p className="text-gray-500 text-center">No playlists match your search.</p>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
             )}
             <div className="flex flex-col sm:flex-row gap-4 p-4 min-h-screen bg-gradient-to-br from-blue-50 to-white">
                 {/* Left Sidebar: Playlists */}
                 <div className="sm:w-1/3 w-full space-y-4">
-                    {playlists.map((playlist) => (
+                    {filteredPlaylists.map((playlist) => (
                         <div
                             key={playlist?._id}
                             className="border border-blue-200 rounded-xl p-4 shadow-md bg-white hover:shadow-lg transition duration-200"

@@ -27,7 +27,7 @@ const filters = [
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const { user } = useSelector(state => state.user || {});
+  const user = useSelector((state) => state.userLogin?.user || state.user?.user || null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState();
   // Read URL params once, synchronously, before first render
@@ -96,7 +96,7 @@ export default function Dashboard() {
   // NEW: store selected playlist ID for modal
   const [selectedPlaylistId, setSelectedPlaylistId] = useState("");
   const [newPlaylistVisibility, setNewPlaylistVisibility] = useState('public');
-
+  console.log(user, "dashboard user");
   // Fetch backend playlists for the logged-in user
   useEffect(() => {
     const fetchBackendPlaylists = async () => {
@@ -426,12 +426,16 @@ export default function Dashboard() {
           {/* User info & Logout */}
           {user && (
             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-blue-200">
-              <div className="hidden sm:flex items-center gap-1 text-blue-800">
+              <button
+                onClick={() => navigate('/profile')}
+                className="hidden sm:flex items-center gap-1 text-blue-800 hover:text-blue-600 transition-colors"
+                title="View profile"
+              >
                 <User size={16} />
                 <span className="text-sm font-medium truncate max-w-[120px]">
-                  {user.username || user.email?.split("@")[0]}
+                  {user.username || user.name || user.email?.split("@")[0]}
                 </span>
-              </div>
+              </button>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-1 text-red-500 hover:text-red-700 transition-colors text-sm"

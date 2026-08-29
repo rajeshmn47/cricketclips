@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { Menu, X, LogOut } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Menu, X, LogOut, UserCircle2 } from "lucide-react";
 import { logout } from "../actions/userAction";
 
 export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useSelector((state) => state.userLogin || {});
+  const user = useSelector((state) => state.userLogin?.user || state.user?.user || null);
 
   const closeMenu = () => setIsOpen(false);
   const toggleMenu = () => setIsOpen((prev) => !prev);
@@ -54,12 +54,20 @@ export default function Navbar() {
               </a>
             ))}
             {user && (
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors"
-              >
-                <LogOut size={18} /> Logout
-              </button>
+              <>
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <UserCircle2 size={18} /> Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors"
+                >
+                  <LogOut size={18} /> Logout
+                </button>
+              </>
             )}
             {!user && (
               <>
@@ -106,12 +114,21 @@ export default function Navbar() {
               </a>
             ))}
             {user && (
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1 w-full text-left py-2 text-red-600 hover:text-red-700"
-              >
-                <LogOut size={18} /> Logout
-              </button>
+              <>
+                <Link
+                  to="/profile"
+                  onClick={closeMenu}
+                  className="flex items-center gap-1 w-full text-left py-2 text-gray-700 hover:text-blue-600"
+                >
+                  <UserCircle2 size={18} /> Profile
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 w-full text-left py-2 text-red-600 hover:text-red-700"
+                >
+                  <LogOut size={18} /> Logout
+                </button>
+              </>
             )}
             {!user && (
               <>
