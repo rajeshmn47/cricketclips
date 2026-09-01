@@ -13,9 +13,11 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const { loading, error, user } = useSelector(
+  const { loading, error } = useSelector(
     (state) => state.userLogin || state.auth || {}
   );
+  const user = useSelector((state) => state.userLogin?.user || state.user?.user || null);
+
 
   useEffect(() => {
     if (user) {

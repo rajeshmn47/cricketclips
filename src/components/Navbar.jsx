@@ -30,7 +30,7 @@ export default function Navbar() {
       external: true,
     },
   ];
-
+  console.log(user, "navbar");
   return (
     <nav className="bg-white shadow-md fixed w-full top-0 left-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,13 +59,13 @@ export default function Navbar() {
                   to="/profile"
                   className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors"
                 >
-                  <UserCircle2 size={18} /> Profile
+                  <UserCircle2 size={18} /> Profiles
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors"
                 >
-                  <LogOut size={18} /> Logout
+                  <LogOut size={18} /> Logouts
                 </button>
               </>
             )}
@@ -113,7 +113,7 @@ export default function Navbar() {
                 {link.name}
               </a>
             ))}
-            {user && (
+            {!user && (
               <>
                 <Link
                   to="/profile"
@@ -130,7 +130,7 @@ export default function Navbar() {
                 </button>
               </>
             )}
-            {!user && (
+            {user && (
               <>
                 <a
                   href="/login"

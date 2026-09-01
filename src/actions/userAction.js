@@ -7,6 +7,7 @@ import {
   LOGIN_FAIL,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
+  LOGOUT_SUCCESS,
   REGISTER_USER_FAIL,
   REGISTER_USER_REQUEST,
   REGISTER_USER_SUCCESS,
@@ -84,9 +85,10 @@ export const forgot = (email) => async (dispatch) => {
 export const logout = () => async (dispatch) => {
   try {
     localStorage.removeItem('token');
+    dispatch({ type: LOGOUT_SUCCESS });
   } catch (error) {
-    console.log(error.response, 'asdfgh');
-    dispatch({ type: LOGIN_FAIL, payload: error.response.data.message });
+    console.log(error.response, 'asdfgh logout');
+    dispatch({ type: LOGIN_FAIL, payload: error.response?.data?.message });
   }
 };
 
@@ -113,7 +115,7 @@ export const loadUser = () => async (dispatch) => {
     const servertoken = localStorage.getItem('token') && localStorage.getItem('token');
     dispatch({ type: LOAD_USER_REQUEST });
     const { data } = await API.get(`${URL}/auth/loaduser`);
-    console.log(data,"user action")
+    console.log(data, "user action")
     if (data.message) {
       dispatch({ type: LOAD_USER_SUCCESS, payload: data.message });
     }

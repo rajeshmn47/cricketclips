@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Dashboard from './pages/Dashboard';
 import About from './pages/About';
 import Login from './pages/Login';
@@ -8,16 +9,23 @@ import Support from './pages/Support';
 import SharedPlaylistPage from './pages/SharedPlaylists';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
-import { ToastBar, Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import PublicPlaylists from './pages/PublicPlaylists';
 
-// 🔒 Protected Route Component (generic, reusable)
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token'); // or get from context / cookie
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
+  const location = useLocation();
+  const user = useSelector((state) => state.user?.user || state.userLogin?.user || null);
+  const token = localStorage.getItem('token');
+  const isAuthenticated = Boolean(token || user);
+
+  return isAuthenticated ? children : <Navigate to="/login" replace state={{ from: location.pathname }} />;
+};
+
+const PublicOnlyRoute = ({ children }) => {
+  const user = useSelector((state) => state.user?.user || state.userLogin?.user || null);
+  const token = localStorage.getItem('token');
+
+  return user ? <Navigate to="/" replace /> : children;
 };
 
 function App() {
@@ -26,16 +34,28 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
       <Router>
         <Routes>
-          {/* Public routes */}
           <Route path="/" element={<Dashboard />} />
           <Route path="/shared-playlist/:id" element={<SharedPlaylistPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <Login />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <Register />
+              </PublicOnlyRoute>
+            }
+          />
           <Route path="/support" element={<Support />} />
-          <Route path='/public-playlists' element={<PublicPlaylists />} />
-          {/* 🔐 Protected route: only logged-in users can access */}
+          <Route path="/public-playlists" element={<PublicPlaylists />} />
           <Route
             path="/playlists"
             element={

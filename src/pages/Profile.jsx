@@ -45,6 +45,40 @@ export default function Profile() {
     const totalClips = playlists.reduce((sum, playlist) => sum + (Array.isArray(playlist.videos) ? playlist.videos.length : 0), 0);
     const recentPlaylists = playlists.slice(0, 3);
 
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50">
+                <Navbar />
+                <div className="max-w-xl mx-auto px-4 pt-24 pb-10">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-lg">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                            <User size={28} />
+                        </div>
+                        <p className="text-sm uppercase tracking-[0.2em] text-blue-600">Profile access</p>
+                        <h1 className="mt-3 text-3xl font-bold text-slate-900">Please log in</h1>
+                        <p className="mt-3 text-slate-600">
+                            You need to sign in to view your profile, saved playlists, and cricket clip collections.
+                        </p>
+                        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => navigate('/register')}
+                                className="rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                                Create account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50">
             <Navbar />

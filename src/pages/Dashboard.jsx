@@ -423,8 +423,8 @@ export default function Dashboard() {
             Clear Filters
           </Button>
 
-          {/* User info & Logout */}
-          {user && (
+          {/* ✅ FIXED: Show Login button when user is not logged in */}
+          {user ? (
             <div className="flex items-center gap-2 ml-2 pl-2 border-l border-blue-200">
               <button
                 onClick={() => navigate('/profile')}
@@ -445,6 +445,14 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
+          ) : (
+            <Button
+              variant="default"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </Button>
           )}
         </div>
       </div>
