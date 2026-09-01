@@ -62,6 +62,7 @@ Search for:
 * Cut shots
 * Straight drives
 * Lofted shots
+* Reverse sweeps
 
 Example:
 
